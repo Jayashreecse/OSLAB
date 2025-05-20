@@ -1,3 +1,111 @@
+//simplified code
+#include <stdio.h>
+
+#define MAX 100
+
+void getInput(int in[], int *n, int *f) {
+    printf("Enter number of pages: ");
+    scanf("%d", n);
+    printf("Enter page sequence: ");
+    for(int i = 0; i < *n; i++) scanf("%d", &in[i]);
+    printf("Enter number of frames: ");
+    scanf("%d", f);
+}
+
+int isHit(int frames[], int f, int page) {
+    for(int i = 0; i < f; i++)
+        if(frames[i] == page) return 1;
+    return 0;
+}
+
+void fifo(int in[], int n, int f) {
+    int frames[MAX] = {-1}, pos = 0, faults = 0;
+    for(int i = 0; i < n; i++) {
+        if(!isHit(frames, f, in[i])) {
+            frames[pos] = in[i];
+            pos = (pos + 1) % f;
+            faults++;
+        }
+        printf("Page %d => ", in[i]);
+        for(int j = 0; j < f; j++) if(frames[j] != -1) printf("%d ", frames[j]);
+        printf("\n");
+    }
+    printf("Total faults: %d\n", faults);
+}
+
+void lru(int in[], int n, int f) {
+    int frames[MAX] = {-1}, faults = 0;
+    for(int i = 0; i < n; i++) {
+        if(!isHit(frames, f, in[i])) {
+            int lruIndex = 0, min = MAX;
+            for(int j = 0; j < f; j++) {
+                int k;
+                for(k = i - 1; k >= 0; k--)
+                    if(frames[j] == in[k]) break;
+                if(k < min) {
+                    min = k;
+                    lruIndex = j;
+                }
+            }
+            frames[lruIndex] = in[i];
+            faults++;
+        }
+        printf("Page %d => ", in[i]);
+        for(int j = 0; j < f; j++) if(frames[j] != -1) printf("%d ", frames[j]);
+        printf("\n");
+    }
+    printf("Total faults: %d\n", faults);
+}
+
+void optimal(int in[], int n, int f) {
+    int frames[MAX] = {-1}, faults = 0;
+    for(int i = 0; i < n; i++) {
+        if(!isHit(frames, f, in[i])) {
+            int farthest = -1, index = -1;
+            for(int j = 0; j < f; j++) {
+                int k;
+                for(k = i + 1; k < n; k++)
+                    if(frames[j] == in[k]) break;
+                if(k > farthest) {
+                    farthest = k;
+                    index = j;
+                }
+            }
+            frames[(index == -1) ? 0 : index] = in[i];
+            faults++;
+        }
+        printf("Page %d => ", in[i]);
+        for(int j = 0; j < f; j++) if(frames[j] != -1) printf("%d ", frames[j]);
+        printf("\n");
+    }
+    printf("Total faults: %d\n", faults);
+}
+
+int main() {
+    int in[MAX], n, f, choice;
+    getInput(in, &n, &f);
+    do {
+        printf("\n1.FIFO  2.Optimal  3.LRU  4.Exit\nChoose: ");
+        scanf("%d", &choice);
+        switch(choice) {
+            case 1: fifo(in, n, f); break;
+            case 2: optimal(in, n, f); break;
+            case 3: lru(in, n, f); break;
+        }
+    } while(choice != 4);
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
 #include <stdio.h>
 
 int n, f, i, j, k;
